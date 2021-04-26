@@ -8,6 +8,7 @@ from random import randint
 import imageio
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 import moviepy.editor as mp
+import time
 
 # from PIL import Image
 
@@ -83,7 +84,7 @@ async def on_message(message):
 
         # Random GIF
         if message.content == '-e gif':
-            await message.channel.send('Retrieving a random top-rated GIF in progress..\n')
+            await message.channel.send('Got your order boss! Retrieving a random top-rated GIF in progress..\n')
 
         # Specified GIF
         else:
@@ -95,7 +96,7 @@ async def on_message(message):
                 display_key += (key + ' ')
             search_key = search_key[0:(len(search_key)-1)] 
             display_key = display_key[0:(len(display_key)-1)] 
-            await message.channel.send('Retrieving %s GIF in progress..\n' % display_key)
+            await message.channel.send('Got your order boss! Retrieving %s GIF in progress..\n' % display_key)
         
         # This loop will break only if the GIP is sent out
         while True:
@@ -113,7 +114,13 @@ async def on_message(message):
                 filename = convert_mp4_gif(filename)
 
                 # Send the GIF to discord channel
-                await message.channel.send(file=discord.File(filename))
+                msg = await message.channel.send(file=discord.File(filename))
+
+                # Delete the GIF after 5s
+                await message.channel.send('Activate self-destruction in 5s!\n')
+                time.sleep(5)
+                await msg.delete()
+                await message.channel.send('Thanks for watching!\n')
 
             except:
                 await message.channel.send('Something went wrong! Retrying...\n')
