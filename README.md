@@ -1,1 +1,1 @@
-# Educ4tor-s-Discord-Bot
+# Educ4tor's Discord Bot
