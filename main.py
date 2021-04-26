@@ -71,10 +71,10 @@ async def on_message(message):
         return
 
     if message.content.startswith("-e") and message.content == '-e':
-        await message.channel.send("Hi! I am **Educ4tor's Educ4ting Bot**!\nPlease use \"-e help\" for help utility!")
+        await message.channel.send("Hi! I am **Educ4tor's Educ4tive Bot**!\nPlease use \"-e help\" for help utility!")
 
     if message.content.startswith('-e help'):
-        await message.channel.send("Welcome to **Educ4tor's Educ4ting Bot** help utility!\n\n - To request a random GIF: \"-e gif\"\n - To request a specified GIF: \"-e gif $\{Name\}\"  (e.g. -e gif Leah Gotti)")
+        await message.channel.send("Welcome to **Educ4tor's Educ4tive Bot** help utility!\n\n - To request a random GIF: \"-e gif\"\n - To request a specified GIF: \"-e gif $\{Name\}\"  (e.g. -e gif Leah Gotti)")
 
     if message.content.startswith('-e gif'):
         # Set the maximum number of tries
