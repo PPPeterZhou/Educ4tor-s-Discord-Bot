@@ -11,19 +11,23 @@ import moviepy.editor as mp
 
 # from PIL import Image
 
-def get_random_video_URL():
-    URL = "https://www.pornhub.com/gifs?o=tr"
+def get_video_URL(search_key=None):
+    if search_key:
+        URL = "https://www.pornhub.com/gifs/search?search=" + search_key + "&page=" + str(randint(1,2))
+    else:
+        URL = "https://www.pornhub.com/gifs?page=" + str(randint(1,5))
+
     page = requests.get(URL)
     soup = BeautifulSoup(page.content, 'html.parser')
     gifs = soup.find_all(class_='gifVideoBlock js-gifVideoBlock')
-    random_num = randint(0, len(gifs)-1)
-    random_gif = gifs[random_num]
-    random_gif_url = "https://www.pornhub.com" + str(random_gif.find('a').get('href'))
+    num = randint(0, len(gifs)-1)
+    gif = gifs[num]
+    gif_url = "https://www.pornhub.com" + str(gif.find('a').get('href'))
 
-    return random_gif_url
+    return gif_url
 
-def download_random_video(url):
-    filename = '/random/random'
+def download_video(url):
+    filename = '/assets/asset'
     page = requests.get(url)
     soup = BeautifulSoup(page.content, 'html.parser')
     video_url = soup.find('div', id='js-gifToWebm', class_="centerImage notModal")['data-mp4']
@@ -51,11 +55,8 @@ def convert_mp4_gif(filename):
     
     writer = imageio.get_writer(outputpath, fps=fps)
     for i,im in enumerate(reader):
-        sys.stdout.write("\rframe {0}".format(i))
-        sys.stdout.flush()
         writer.append_data(im)
     writer.close()
-    print("Done.")
     return outputpath
 
 client = discord.Client()
@@ -69,28 +70,72 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith('-e help'):
-        await message.channel.send("Welcome to Educ4tor's Educ4ting Bot help utility!\n\n - To request a random GIF: \"-e gif\"")
+    if message.content.startswith("-e") and message.content == '-e':
+        await message.channel.send("Hi! I am **Educ4tor's Educ4ting Bot**!\nPlease use \"-e help\" for help utility!")
 
-    
+    if message.content.startswith('-e help'):
+        await message.channel.send("Welcome to **Educ4tor's Educ4ting Bot** help utility!\n\n - To request a random GIF: \"-e gif\"\n - To request a specified GIF: \"-e gif $\{Name\}\"  (e.g. -e gif Leah Gotti)")
+
     if message.content.startswith('-e gif'):
+        # Set the maximum number of tries
+        num_retry = 0
+        search_key = None
+
         # Random GIF
         if message.content == '-e gif':
-            await message.channel.send('Retrieving the top-rated random GIF!\n')
+            await message.channel.send('Retrieving a random top-rated GIF in progress..\n')
 
-            # Get a random video url
-            random_video_url = get_random_video_URL()
-            filename = download_random_video(random_video_url)
-            filename = convert_mp4_gif(filename)
+        # Specified GIF
+        else:
+            search_key_list = message.content.split(' ')[2:]
+            search_key = ""
+            display_key = ""
+            for key in search_key_list:
+                search_key += (key + '+')
+                display_key += (key + ' ')
+            search_key = search_key[0:(len(search_key)-1)] 
+            display_key = display_key[0:(len(display_key)-1)] 
+            await message.channel.send('Retrieving %s GIF in progress..\n' % display_key)
+        
+        # This loop will break only if the GIP is sent out
+        while True:
+            try:  
+                # Get a random video url
+                if search_key:
+                    video_url = get_video_URL(search_key)
+                else:
+                    video_url = get_video_URL()
 
+                # Download, trim and resize the video
+                filename = download_video(video_url)
 
-            await message.channel.send(file=discord.File(filename))
+                # Convert the video into GIF
+                filename = convert_mp4_gif(filename)
 
+                # Send the GIF to discord channel
+                await message.channel.send(file=discord.File(filename))
+
+            except:
+                await message.channel.send('Something went wrong! Retrying...\n')
+
+                # When any of the steps fails, retry and add 1 to num_retries
+                num_retry += 1
+
+                # If num_retry > 5, abort.
+                if num_retry > 5:
+                    await message.channel.send('Bot is sick :( Contact Educ4tor!\n')
+                    break
+
+                continue
+
+            # Remove the files from the local
             abs_path = str(os.path.dirname(os.path.abspath(__file__)))
-            os.remove(abs_path+'/random/random.mp4')        
-            os.remove(abs_path+'/random/random_resized.mp4')  
-            os.remove(abs_path+'/random/random_trimmed.mp4')  
-            os.remove(abs_path+'/random/random_resized.gif')  
+            os.remove(abs_path+'/assets/asset.mp4')        
+            os.remove(abs_path+'/assets/asset_resized.mp4')  
+            os.remove(abs_path+'/assets/asset_trimmed.mp4')  
+            os.remove(abs_path+'/assets/asset_resized.gif')  
+            break
 
+# Load the .env since the original one does not work
 load_dotenv()
 client.run(os.getenv('TOKEN'))
