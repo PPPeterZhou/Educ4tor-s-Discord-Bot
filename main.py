@@ -37,7 +37,7 @@ def download_random_video(url):
 
     # Resize it to max_height = 360
     clip = mp.VideoFileClip(targetname)
-    clip_resized = clip.resize(height=360) # make the height 360px ( According to moviePy documenation The width is then computed so that the width/height ratio is conserved.)
+    clip_resized = clip.resize(height=240) # make the height 360px ( According to moviePy documenation The width is then computed so that the width/height ratio is conserved.)
     clip_resized.write_videofile(curr_path + filename + '_resized' + '.mp4')
 
     return filename+'_resized'
@@ -85,7 +85,12 @@ async def on_message(message):
 
 
             await message.channel.send(file=discord.File(filename))
-        
+
+            abs_path = str(os.path.dirname(os.path.abspath(__file__)))
+            os.remove(abs_path+'/random/random.mp4')        
+            os.remove(abs_path+'/random/random_resized.mp4')  
+            os.remove(abs_path+'/random/random_trimmed.mp4')  
+            os.remove(abs_path+'/random/random_resized.gif')  
 
 load_dotenv()
 client.run(os.getenv('TOKEN'))
