@@ -14,7 +14,7 @@ import time
 
 def get_video_URL(search_key=None):
     if search_key:
-        URL = "https://www.pornhub.com/gifs/search?search=" + search_key + "&page=" + str(randint(1,2))
+        URL = "https://www.pornhub.com/gifs/search?search=" + search_key + "&page=1"
     else:
         URL = "https://www.pornhub.com/gifs?page=" + str(randint(1,5))
 
